@@ -1,23 +1,23 @@
 package ru.whitebite;
 
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
+
+import javax.xml.XMLConstants;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.net.URL;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.ParserConfigurationException;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.NodeList;
-import org.w3c.dom.Node;
-import org.w3c.dom.Element;
-import org.xml.sax.SAXException;
 
 public class Main {
 
-    static NodeList nList;
-
-    private final static String findStr = "Гонконгских долларов";
-    private final static String urlStr = "http://www.cbr.ru/scripts/XML_daily.asp";
+    private static final String FIND_STR = "Гонконгских долларов";
+    private static final String URL_STR = "http://www.cbr.ru/scripts/XML_daily.asp";
+    private static NodeList nList;
 
     public static void main(String[] args) {
         menu(args);
@@ -25,7 +25,7 @@ public class Main {
 
     private static void menu(String[] args) {
         if (args.length == 0) {
-            initNodeList(urlStr);
+            initNodeList();
             findValute();
             return;
         }
@@ -37,16 +37,17 @@ public class Main {
                 help();
                 break;
             default:
-                initNodeList(urlStr);
+                initNodeList();
                 findValute();
         }
     }
 
-    private static void initNodeList(String strUrl) {
+    private static void initNodeList() {
         try {
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+            dbFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
             DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-            Document doc = dBuilder.parse(new URL(strUrl).openStream());
+            Document doc = dBuilder.parse(new URL(Main.URL_STR).openStream());
             doc.getDocumentElement().normalize();
 
             nList = doc.getElementsByTagName("Valute");
@@ -57,7 +58,7 @@ public class Main {
     }
 
     private static void readXML() {
-        initNodeList(Main.urlStr);
+        initNodeList();
         printDoc();
     }
 
@@ -66,7 +67,7 @@ public class Main {
             Node nNode = nList.item(temp);
             if (nNode.getNodeType() == Node.ELEMENT_NODE) {
                 Element eElement = (Element) nNode;
-                if (eElement.getElementsByTagName("Name").item(0).getTextContent().equals(Main.findStr)) {
+                if (eElement.getElementsByTagName("Name").item(0).getTextContent().equals(Main.FIND_STR)) {
                     printElem(eElement);
 
                     System.out.println("----------------------------");
@@ -102,10 +103,10 @@ public class Main {
 
     private static void help() {
         System.out.println("=|=================HELP============================|=");
-        System.out.println(" |  use \"help\" for help                          |");
+        System.out.println(" |  use \"help\" for help                            |");
         System.out.println(" |  use any or empty value for find                |");
         System.out.println(" |  exchange rate of Hong Kong dollars in rubles   |");
-        System.out.println(" |  use \"read\" for read CBR doc  from            |");
+        System.out.println(" |  use \"read\" for read CBR doc  from              |");
         System.out.println(" |  http://www.cbr.ru/scripts/XML_daily.asp        |");
         System.out.println("=|=================================================|=");
     }
